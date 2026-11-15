@@ -1,6 +1,7 @@
 --!strict
 -- Write the Assistant skills shipped with the live Roblox Studio release to
--- skills/, one file per document. Run from the repository root:
+-- skills/, one file per document. Run from the repository root, with Lune
+-- 0.11 or later (0.10 refuses Assistant.rbxm):
 --
 --     lune run tools/extract.luau
 --
@@ -8,10 +9,10 @@
 
 local fs = require("@lune/fs")
 local net = require("@lune/net")
+local roblox = require("@lune/roblox")
 local serde = require("@lune/serde")
 
 local unzip = require("./lib/unzip")
-local stringValues = require("./lib/stringValues")
 
 local SKILLS = "Assistant/Packages/_Index/AssistantSkills/AssistantSkills/"
 
@@ -21,24 +22,37 @@ local function get(url: string): string
 	return response.body
 end
 
+local function pathOf(instance): string
+	local path = instance.Name
+	local parent = instance.Parent
+	while parent do
+		path = `{parent.Name}/{path}`
+		parent = parent.Parent
+	end
+	return path
+end
+
 -- 1. Which Studio is live? (clientVersionUpload names its files on the CDN.)
 local live = serde.decode("json", get("https://clientsettings.roblox.com/v2/client-version/WindowsStudio64"))
 
 -- 2. Its built-in plugins, and the Assistant plugin inside them.
 local zip = get(`https://setup.rbxcdn.com/{live.clientVersionUpload}-BuiltInStandalonePlugins.zip`)
-local assistant = unzip(zip, "Optimized_Embedded_Signature/Assistant.rbxm")
+local assistant = roblox.deserializeModel(unzip(zip, "Optimized_Embedded_Signature/Assistant.rbxm"))
 
 -- 3. Every skill document is a StringValue under SKILLS.
 if fs.isDir("skills") then
 	fs.removeDir("skills")
 end
 local count = 0
-for path, text in stringValues(assistant) do
-	if string.sub(path, 1, #SKILLS) == SKILLS then
-		local file = "skills/" .. string.sub(path, #SKILLS + 1) .. ".md"
-		fs.writeDir(string.match(file, "^(.*)/") :: string)
-		fs.writeFile(file, (string.gsub(text, "\r\n", "\n")))
-		count += 1
+for _, root in assistant do
+	for _, instance in root:GetDescendants() do
+		local path = pathOf(instance)
+		if instance:IsA("StringValue") and string.sub(path, 1, #SKILLS) == SKILLS then
+			local file = "skills/" .. string.sub(path, #SKILLS + 1) .. ".md"
+			fs.writeDir(string.match(file, "^(.*)/") :: string)
+			fs.writeFile(file, (string.gsub(instance.Value, "\r\n", "\n")))
+			count += 1
+		end
 	end
 end
 assert(count > 0, "no skill found: the Assistant plugin layout changed")

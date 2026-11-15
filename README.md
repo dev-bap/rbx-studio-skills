@@ -21,8 +21,8 @@ character.
 
 ## How it is extracted
 
-`tools/extract.luau`, run with [Lune](https://github.com/lune-org/lune) from the
-repository root:
+`tools/extract.luau`, run with [Lune](https://github.com/lune-org/lune) 0.11 or
+later from the repository root:
 
 ```powershell
 lune run tools/extract.luau
@@ -39,10 +39,10 @@ keeps the history. `.github/workflows/extract.yml` runs the script once a day
 and commits when something changed; it can also be started by hand from the
 Actions tab.
 
-The two files in `tools/lib/` read the zip and model formats, because Lune
-cannot: it has no zip reader, and `roblox.deserializeModel` refuses
-`Assistant.rbxm` (`Property BoolValue.Tags should be SharedString`), which is
-also why Studio calls the file corrupted when it is imported.
+Lune has no zip reader, so `tools/lib/unzip.luau` finds `Assistant.rbxm` in
+the archive and hands its decompression to Lune's `serde`. The model itself is
+read with `roblox.deserializeModel`, which needs Lune 0.11: 0.10 refuses
+`Assistant.rbxm` (`Property BoolValue.Tags should be SharedString`).
 
 ## Ownership
 
