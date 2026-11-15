@@ -1,3 +1,8 @@
+---
+name: device-simulator-lua
+description: Control the Studio Device Simulator to test UI across device form factors. Use when switching devices, testing orientations, running multi-device comparisons, or verifying UI layout via MCP tools (execute_luau + screen_capture).
+---
+
 # Device Simulator Skill
 
 ## When to Use
@@ -102,12 +107,12 @@ This tells the agent:
 
 ## Disambiguation & Defaults
 
-### Fuzzy Term -> Device
+### Fuzzy Term → Device
 
 **Device list is dynamic — always read it fresh via `GetDeviceListAsync()` + `GetDeviceInfoAsync()`.** The table below is a fallback guide for name matching. If a newer device is in the list (e.g., iPhone 15 Pro), prefer it over older ones.
 
 | User says | How to pick | Example |
-|-----------|------------|--------|
+|-----------|------------|---------|
 | "iPhone" / "phone" / "mobile" | Latest iPhone — highest generation number | iPhone 17 Pro > iPhone 16 Pro Max > iPhone 16 |
 | "iPad" / "tablet" | Latest iPad — highest generation number | iPad Pro M5 (13in) > iPad Air 5th Gen > iPad 10th Gen |
 | "Xbox" / "console" | Match "Xbox" in name | Xbox One |
@@ -141,7 +146,7 @@ Use these when reporting findings — e.g., "On Xbox, the timer text is only 8% 
 ### Defaults
 
 - **Orientation:** Always Landscape. Only Portrait if user explicitly asks.
-- **Device lookup:** name match -> fuzzy match -> resolution match -> create custom via `CreateDeviceAsync` (last resort)
+- **Device lookup:** name match → fuzzy match → resolution match → create custom via `CreateDeviceAsync` (last resort)
 
 ### End state after testing
 
@@ -261,11 +266,11 @@ This tells the agent:
 ### Scale vs Offset sizing
 
 `GuiObject.Size` is `UDim2.new(xScale, xOffset, yScale, yOffset)`:
-- **Scale** (0-1): fraction of parent -> **responsive** — resizes with viewport
-- **Offset** (pixels): fixed -> **not responsive** — may overflow on small screens
+- **Scale** (0–1): fraction of parent → **responsive** — resizes with viewport
+- **Offset** (pixels): fixed → **not responsive** — may overflow on small screens
 
-When the agent sees `Size:{0.5, 0},{1, 0}` -> "half parent width, responsive."
-When the agent sees `Size:{0, 200},{0, 50}` -> "always 200x50 pixels, will overflow if viewport < 200px wide."
+When the agent sees `Size:{0.5, 0},{1, 0}` → "half parent width, responsive."
+When it sees `Size:{0, 200},{0, 50}` → "always 200×50 pixels, will overflow if viewport < 200px wide."
 
 ### Layout components
 
@@ -316,7 +321,7 @@ Don't just report problems — suggest how to fix them:
 |-------------|---------------|
 | **Off-screen / clipping** | Switch from Offset to Scale sizing, or add `UISizeConstraint` with a max that fits the viewport |
 | **Text truncation** | Use `TextScaled = true`, reduce text length, or increase the TextLabel size |
-| **Touch target too small** | Increase button size to at least 44x44; consider using `UISizeConstraint` with `MinSize` |
+| **Touch target too small** | Increase button size to at least 44×44; consider using `UISizeConstraint` with `MinSize` |
 | **Overlap** | Check if siblings need a `UIListLayout` to auto-arrange, or adjust `Position`/`Size` to not collide |
 | **Missing element on small screen** | Check if a script hides it based on viewport size — if unintentional, use Scale sizing instead |
 | **Layout break (elements pile up)** | Add `UIListLayout` with `FillDirection` and `Wraps`, or use script-driven responsive layout |
@@ -336,7 +341,7 @@ Not every layout change is a bug. Use this judgment table:
 
 | Observation | Verdict |
 |-------------|---------|
-| Elements reflow from horizontal -> vertical when viewport narrows | **Expected** if parent has `UIListLayout` or script-driven layout |
+| Elements reflow from horizontal → vertical when viewport narrows | **Expected** if parent has `UIListLayout` or script-driven layout |
 | Element shrinks proportionally with viewport | **Expected** if using Scale-based sizing |
 | Element stays same pixel size on all devices | **Expected** if using Offset-only sizing — but **flag if it overflows** |
 | Element disappears on small screen | **Could be intentional** (responsive hiding) — report to user, don't judge |
@@ -499,10 +504,10 @@ UI Structure:
 | Xbox One            | 1920x1080 | 1920x1080  | Timer text too small for TV/couch   |
 
 Findings:
-  - Galaxy A06: HUD covers nearly full width — consider scaling down on small viewports
-  - Xbox One: Timer labels hard to read at couch distance — consider UIScale for console
-  - CoreUISafeInsets doesn't handle notch — consider DeviceSafeInsets for iPhone X+
-  - FinishFrame.ImageLabel is 600px fixed — will overflow on Galaxy A06 (705px viewport)
+  ⚠️ Galaxy A06: HUD covers nearly full width — consider scaling down on small viewports
+  ❌ Xbox One: Timer labels hard to read at couch distance — consider UIScale for console
+  ⚠️ CoreUISafeInsets doesn't handle notch — consider DeviceSafeInsets for iPhone X+
+  ❌ FinishFrame.ImageLabel is 600px fixed — will overflow on Galaxy A06 (705px viewport)
 
 ```
 
@@ -528,17 +533,17 @@ When you stop simulation, the viewport goes back to Studio's default size.
 
 ```
 No simulation ("default")
-  |
-  +-- SetDeviceAsync(id) --> Device active (viewport = device resolution)
-  |                              |
-  |                              +-- SetOrientationAsync() --> viewport rotates
-  |                              +-- SetResolutionAsync() --> override device resolution
-  |                              +-- SetPixelDensityAsync() --> override DPI
-  |                              +-- SetScalingModeAsync() --> change how viewport fits in Studio
-  |
-  +-- SetDeviceAsync("default") or StopSimulationAsync() --> back to no simulation
-  |
-  +-- SetOrientationAsync() --> stored, applied when a device is activated later
+  │
+  ├── SetDeviceAsync(id) ──→ Device active (viewport = device resolution)
+  │                              │
+  │                              ├── SetOrientationAsync() ──→ viewport rotates
+  │                              ├── SetResolutionAsync() ──→ override device resolution
+  │                              ├── SetPixelDensityAsync() ──→ override DPI
+  │                              └── SetScalingModeAsync() ──→ change how viewport fits in Studio
+  │
+  ├── SetDeviceAsync("default") or StopSimulationAsync() ──→ back to no simulation
+  │
+  └── SetOrientationAsync() ──→ stored, applied when a device is activated later
 ```
 
 ### Device presets vs overrides
@@ -628,9 +633,9 @@ if not ok then warn(err) end
 | `StopSimulationAsync()` | — | Stop simulation (recommended over `SetDeviceAsync("default")`) |
 | `SetOrientationAsync(ori)` | — | See enum values below. Can call before device is active (pre-set). |
 | `GetOrientationAsync()` | `Enum.ScreenOrientation` | |
-| `SetResolutionAsync(w, h)` | — | 1-7680 x 1-4320. Landscape-canonical: w = longer dimension. **Requires active device.** |
+| `SetResolutionAsync(w, h)` | — | 1–7680 × 1–4320. Landscape-canonical: w = longer dimension. **Requires active device.** |
 | `GetResolutionAsync()` | `Vector2` | **Requires active device** (errors if no device active). |
-| `SetPixelDensityAsync(dpi)` | — | 72-10000. Controls widget physical size, NOT Camera.ViewportSize. **Requires active device.** |
+| `SetPixelDensityAsync(dpi)` | — | 72–10000. Controls widget physical size, NOT Camera.ViewportSize. **Requires active device.** |
 | `GetPixelDensityAsync()` | `number` | **Requires active device.** |
 | `SetScalingModeAsync(mode)` | — | See enum values below. **Requires active device. Persists across SetDeviceAsync.** |
 | `GetScalingModeAsync()` | `Enum.DeviceSimulatorScalingMode` | **Requires active device.** |
@@ -710,10 +715,10 @@ Used by `GetDeviceInfoAsync` (read), `CreateDeviceAsync` (create), and `UpdateDe
 | Field | Type | Create/Update | Description |
 |-------|------|---------------|-------------|
 | `DeviceId` | string | Read-only | Unique identifier (= Name for custom devices) |
-| `Name` | string | Required | Display name, 1-200 chars, not `"default"` |
-| `Width` | number | Required | Screen width in pixels, 1-7680 |
-| `Height` | number | Required | Screen height in pixels, 1-4320 |
-| `PixelDensity` | number | Required | DPI, 72-10000 |
+| `Name` | string | Required | Display name, 1–200 chars, not `"default"` |
+| `Width` | number | Required | Screen width in pixels, 1–7680 |
+| `Height` | number | Required | Screen height in pixels, 1–4320 |
+| `PixelDensity` | number | Required | DPI, 72–10000 |
 | `DeviceForm` | Enum.DeviceForm | Optional (default: Phone) | `Phone`, `Tablet`, `Desktop`, `Console`, or `VR` |
 | `IsCustom` | boolean | Read-only | Whether the device is user-created |
 | `ResolutionScale` | number | Optional (default: 1.0) | Resolution scaling factor, > 0, max 10.0 |
@@ -776,14 +781,14 @@ end)
 ### Call ordering
 
 ```
-SetOrientationAsync  -> anytime (pre-set semantic, stored for next activation)
-SetDeviceAsync       -> anytime (activates device, clears resolution + DPI overrides)
-SetResolutionAsync   -> REQUIRES active device (errors otherwise)
-SetPixelDensityAsync -> REQUIRES active device (errors otherwise)
-SetScalingModeAsync  -> REQUIRES active device (persists independently, never auto-cleared)
+SetOrientationAsync  → anytime (pre-set semantic, stored for next activation)
+SetDeviceAsync       → anytime (activates device, clears resolution + DPI overrides)
+SetResolutionAsync   → REQUIRES active device (errors otherwise)
+SetPixelDensityAsync → REQUIRES active device (errors otherwise)
+SetScalingModeAsync  → REQUIRES active device (persists independently, never auto-cleared)
 ```
 
-**Recommended sequence:** `SetOrientationAsync` -> `SetDeviceAsync` -> `SetResolutionAsync` (if needed)
+**Recommended sequence:** `SetOrientationAsync` → `SetDeviceAsync` → `SetResolutionAsync` (if needed)
 
 ---
 
@@ -812,7 +817,7 @@ SetScalingModeAsync  -> REQUIRES active device (persists independently, never au
 9. **Built-in presets are immutable** — `UpdateDeviceAsync`/`RemoveDeviceAsync` only work on custom devices.
 10. **Resolution is landscape-canonical** — `SetResolutionAsync(w, h)`: w = longer dimension, h = shorter, regardless of current orientation.
 11. **DPI controls widget size, not viewport** — `SetPixelDensityAsync` changes the physical size of the viewport widget on your monitor, NOT `Camera.ViewportSize`. Only visible in `ScaleToPhysicalSize` mode.
-12. **Camera.ViewportSize != GetResolutionAsync()** — ViewportSize is affected by orientation, scaling mode, and safe area. Use `GetDeviceAsync()` for deterministic verification.
+12. **Camera.ViewportSize ≠ GetResolutionAsync()** — ViewportSize is affected by orientation, scaling mode, and safe area. Use `GetDeviceAsync()` for deterministic verification.
 
 ---
 
@@ -856,11 +861,11 @@ Test UI on a specific device using the Studio Device Simulator.
    - **Ask only if:** StarterGui is empty/all Visible=false, or there are multiple distinct pages and user didn't specify.
 
 3. **Find the right device** — read the device list (see SKILL.md "Switch to a device") and pick based on user's request:
-   - Specific device name -> match by name
-   - "iPhone" / "phone" / "mobile" -> latest `Phone` (highest generation number)
-   - "tablet" / "iPad" -> latest `Tablet`
-   - "console" / "Xbox" -> match "Xbox" in name
-   - "VR" / "Quest" -> match "Quest" or "Meta"
+   - Specific device name → match by name
+   - "iPhone" / "phone" / "mobile" → latest `Phone` (highest generation number)
+   - "tablet" / "iPad" → latest `Tablet`
+   - "console" / "Xbox" → match "Xbox" in name
+   - "VR" / "Quest" → match "Quest" or "Meta"
    - If no match, **ask the user**
 
 4. **Switch device** via `execute_luau` (see SKILL.md code snippet). Always `task.wait(0.2)` after.
@@ -947,9 +952,9 @@ Test UI in both landscape and portrait orientations on a device, capturing scree
 1. Connect to Studio — if multiple instances are open, call `list_roblox_studios` and `set_active_studio` first
 
 2. **Check if the game supports portrait** — read `StarterGui.ScreenOrientation`:
-   - `LandscapeSensor` / `LandscapeLeft` / `LandscapeRight` -> **Tell the user this game is landscape-only.** Ask if they still want to proceed.
-   - `Sensor` -> Both orientations supported, proceed.
-   - `Portrait` -> Portrait only, skip landscape.
+   - `LandscapeSensor` / `LandscapeLeft` / `LandscapeRight` → **Tell the user this game is landscape-only.** Ask if they still want to proceed.
+   - `Sensor` → Both orientations supported, proceed.
+   - `Portrait` → Portrait only, skip landscape.
 
 3. If no device is active, pick the latest `Phone` (highest generation number) from the device list. Switch via `execute_luau`.
 

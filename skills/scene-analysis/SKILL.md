@@ -1,3 +1,8 @@
+---
+name: scene-analysis
+description: Analyze and optimize Roblox scenes using SceneAnalysisService — rendering, memory, instance composition, unparented instances, and animation/audio assets. Use when investigating performance, memory, or leaks in a place.
+---
+
 # Scene Analysis
 
 Uses `SceneAnalysisService` to analyze and optimize Roblox game scenes. All commands follow the same cycle:
@@ -24,13 +29,15 @@ Uses `SceneAnalysisService` to analyze and optimize Roblox game scenes. All comm
 ## SceneAnalysisService queries
 
 | Query | Returns |
-|-------|--------|
+|-------|---------|
 | `GetInstanceCompositionAsync()` | Instance counts by category and class |
 | `GetTriangleCompositionAsync()` | Triangle and draw call counts by render pass (view-dependent) |
 | `GetScriptMemoryAsync()` | Per-script Luau VM heap memory |
 | `GetUnparentedInstancesAsync()` | Instances held in memory but not in the DataModel, traced to host scripts |
 | `GetAnimationMemoryAsync()` | Loaded animation clip memory with owner Animators |
 | `GetAudioMemoryAsync()` | Loaded audio asset memory with owner Sound/AudioPlayer instances |
+
+See `QuerySpecs.md` in this skill for full data shape documentation.
 
 ## Key facts
 
@@ -50,7 +57,3 @@ Frame findings as opportunities, not problems. Be helpful and collaborative. Avo
 ~800k triangles and ~600 draw calls is roughly the range where most devices can maintain 60fps. Present these as context, not pass/fail criteria — some creators target higher fidelity and accept lower framerates. Ask about framerate/device target before making strong recommendations.
 
 Internally, each draw call costs roughly the equivalent of 20,000 triangles in GPU overhead — use this to prioritize draw call reduction in recommendations, but don't show the ratio to the creator.
-
----
-
-[... Full QuerySpecs, Command Workflows, and API details omitted for brevity in this summary ...]

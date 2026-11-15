@@ -1,3 +1,8 @@
+---
+name: docs-search
+description: Look up Roblox documentation using the http_get tool — Engine API reference, creator guides (avatar, characters, Studio workflows), cloud API, and docs indexes. Use when you need accurate API details or how-to guidance.
+---
+
 # Roblox Documentation Lookup
 
 Use the `http_get` tool to fetch official Roblox documentation as clean markdown.
@@ -46,45 +51,45 @@ Use `query` on large guides the same way as engine API pages.
 1. If you KNOW the exact API and need the full reference:
    ```
    http_get(url: "https://create.roblox.com/docs/reference/engine/classes/Part.md")
-   ````
+   ```
 
 2. If you need requirements or how-to guidance (avatar setup, rigging, movement controllers):
    ```
    http_get(url: "https://create.roblox.com/docs/avatar-setup/auto-setup-requirements.md")
    http_get(url: "https://create.roblox.com/docs/art/characters/specifications.md", query: "higher-fidelity")
-   ````
+   ```
 
 3. If you need to SEARCH within a page, use the query parameter:
    ```
    http_get(url: "https://create.roblox.com/docs/reference/engine/classes/Part.md", query: "Anchored")
    http_get(url: "https://create.roblox.com/docs/reference/engine/classes/BasePart.md", query: "Anchored")
-   ````
+   ```
    Misses cost almost nothing. If you find a match, fetch the full page with only `url`.
 
 4. For more context around a match without returning the full document:
    ```
    http_get(url: "...", query: "Anchored", context_lines: 10)
-   ````
+   ```
 
 5. For the full document when the query matches, without a second call:
    ```
    http_get(url: "...", query: "Anchored", return_full: true)
-   ````
+   ```
 
 6. If you don't know which API to look up, use the engine index:
    ```
    http_get(url: "https://create.roblox.com/docs/reference/engine/llms.txt")
-   ````
+   ```
 
 7. To discover creator guides by topic, use the site index or search with `query`:
    ```
    http_get(url: "https://create.roblox.com/docs/llms.txt", query: "avatar-setup")
-   ````
+   ```
 
 8. If the user references a deprecated API:
    ```
    http_get(url: "https://create.roblox.com/docs/reference/engine/deprecated.md")
-   ````
+   ```
 
 ## Rules
 

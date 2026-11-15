@@ -1,10 +1,14 @@
+---
+name: create-skill
+description: Guide the user through authoring or modifying a custom skill. Use when the user wants to create, edit, update, or rename a skill.
+---
 # Creating a Custom Skill
 
 You are helping the user create a new custom skill for the Studio Assistant. Follow this process.
 
 ## Step 1: Gather Requirements
 
-Use the `ask_questions` tool to ask the user:
+Use the `{ToolNames.QuestionAnswer}` tool to ask the user:
 
 1. **What should this skill do?** Get a clear description of the task or workflow.
 2. **When should it be used?** What triggers or keywords should cause the agent to invoke it.
@@ -12,7 +16,7 @@ Use the `ask_questions` tool to ask the user:
 
 If the user already described what they want in the conversation, infer from context rather than re-asking.
 
-**Important:** Do NOT use plan mode or other heavyweight workflows. This is a simple guided creation — use `ask_questions` to gather info, then call `create_skill`.
+**Important:** Do NOT use plan mode or other heavyweight workflows. This is a simple guided creation — use `{ToolNames.QuestionAnswer}` to gather info, then call `{ToolNames.CreateSkill}`.
 
 ## Step 2: Choose a Name
 
@@ -57,10 +61,10 @@ Example structure:
 
 ## Step 5: Create the Skill
 
-Once you have all three parts ready, call the `create_skill` tool:
+Once you have all three parts ready, call the `{ToolNames.CreateSkill}` tool:
 
 ```
-create_skill({
+{ToolNames.CreateSkill}({
   skill_name: "<name>",
   skill_description: "<description>",
   skill_body: "<markdown body content>"
@@ -73,16 +77,16 @@ The skill will be published and immediately available in the Skills tab.
 
 After creation, let the user know:
 - The skill was created successfully
-- Where they can find it (Skills tab -> Personal)
+- Where they can find it (Skills tab → Personal)
 - That they can edit it anytime by selecting it and clicking Open
 - They can test it by asking the assistant something that should trigger it
 
 ## Modifying Existing Skills
 
-If the user wants to edit, update, or rename an existing skill, use the `edit_skill` tool instead of creating a new one.
+If the user wants to edit, update, or rename an existing skill, use the `{ToolNames.EditSkill}` tool instead of creating a new one.
 
 ```
-edit_skill({
+{ToolNames.EditSkill}({
   skill_name: "<current name of the skill to modify>",
   new_name: "<optional new name>",
   new_description: "<optional new description>",
@@ -92,7 +96,7 @@ edit_skill({
 
 Only pass the fields being changed — omitted fields stay unchanged. The tool handles collision checks on rename automatically.
 
-Follow the same guidelines from Steps 2-4 when writing new names, descriptions, or bodies.
+Follow the same guidelines from Steps 2–4 when writing new names, descriptions, or bodies.
 
 ## Tips for Great Skills
 

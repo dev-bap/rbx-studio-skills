@@ -1,16 +1,21 @@
+---
+name: unit-test
+description: Write, run, and debug Luau unit tests for ModuleScripts in Roblox Studio. Use this skill only when the user asks to add unit tests, improve test coverage, run existing tests, or debug failing tests. Do not use it for playtesting, gameplay QA, or validating visuals and UI feel.
+---
+
 # Unit Test
 
 ## TOOLS
 
-- script_search: Find scripts by name.
-- script_grep: Search script content for keywords.
-- script_read: Read script contents.
-- search_game_tree: Browse the game hierarchy.
-- inspect_instance: Get detailed properties and attributes of an instance.
-- execute_luau: Run Luau to query game state and to run tests. RETURN values, do not print, except that the test run itself prints its results to the console by design.
-- multi_edit: Create and edit scripts.
-- start_stop_play: Start or stop a Play session. Tests run only in Play.
-- get_console_output: Read the console. This is how test results are collected.
+- {ToolNames.FileSearch}: Find scripts by name.
+- {ToolNames.GrepSearch}: Search script content for keywords.
+- {ToolNames.ReadFile}: Read script contents.
+- {ToolNames.GameTree}: Browse the game hierarchy.
+- {ToolNames.InspectInstance}: Get detailed properties and attributes of an instance.
+- {ToolNames.ExecuteLuau}: Run Luau to query game state and to run tests. RETURN values, do not print, except that the test run itself prints its results to the console by design.
+- {ToolNames.MultiEdit}: Create and edit scripts.
+- {ToolNames.StartStopPlay}: Start or stop a Play session. Tests run only in Play.
+- {ToolNames.GetConsoleOutput}: Read the console. This is how test results are collected.
 
 ## WHAT IS UNIT TESTABLE
 
@@ -22,7 +27,7 @@
 
 Before writing anything, check whether the place already uses a test framework, and conform to it. Use the built-in harness (LAYOUT onward) only when none is found.
 
-1. Detect with script_grep and script_search:
+1. Detect with {ToolNames.GrepSearch} and {ToolNames.FileSearch}:
    - Jest-Lua: a `JestGlobals` or `Jest` ModuleScript (usually under `Packages`), or spec modules that `require(... JestGlobals)`. Grep for `JestGlobals`. This is the framework Roblox uses internally and the most likely modern choice.
    - TestEZ: a `TestEZ` ModuleScript, a `TestBootstrap` reference, or spec modules using `describe`/`it`/`expect` that return a function. Grep for `TestEZ`.
    - Existing specs in any form: ModuleScripts named `*.spec` or `*_spec`. Grep for `.spec` and `describe(`.
@@ -39,9 +44,9 @@ The same intent maps across all three, so reuse the test design without relearni
 | truthy | `expect.truthy(v)` | `expect(v).toBeTruthy()` | `expect(v).to.be.ok()` |
 | falsy | `expect.falsy(v)` | `expect(v).toBeFalsy()` | `expect(v).to.never.be.ok()` |
 
-To run a detected framework inside Studio: start Play, then invoke its entry point with execute_luau (for Jest-Lua, the project's `runCLI` script pointed at the spec root; for TestEZ, `require(path.TestEZ).TestBootstrap:run({ specRoot })`), and read results from get_console_output.
+To run a detected framework inside Studio: start Play, then invoke its entry point with {ToolNames.ExecuteLuau} (for Jest-Lua, the project's `runCLI` script pointed at the spec root; for TestEZ, `require(path.TestEZ).TestBootstrap:run({ specRoot })`), and read results from {ToolNames.GetConsoleOutput}.
 
-Everything in TEST THE CONTRACT NOT THE IMPLEMENTATION, TEST CASE CONVENTIONS, ISOLATING DEPENDENCIES, and DEBUGGING FAILINGS (contract-first design, Arrange-Act-Assert, one behavior per case, isolation, boundary and error coverage, determinism, dependency injection) applies regardless of framework. Only the harness, file layout, and run command change.
+Everything in TEST THE CONTRACT NOT THE IMPLEMENTATION, TEST CASE CONVENTIONS, ISOLATING DEPENDENCIES, and DEBUGGING FAILURES (contract-first design, Arrange-Act-Assert, one behavior per case, isolation, boundary and error coverage, determinism, dependency injection) applies regardless of framework. Only the harness, file layout, and run command change.
 
 ## BUILT-IN HARNESS (fallback when no framework is detected)
 
@@ -157,6 +162,8 @@ function expect.deepEqual(actual, expected)
 end
 
 -- Runs one test in isolation with a yield-based timeout.
+-- A case that never yields (for example a tight infinite loop) cannot be
+-- preempted; the timeout only bounds cases that yield while waiting.
 local function runOne(fn, timeout)
 	local done, ok, err = false, false, nil
 	local cpuStart = os.clock()
@@ -226,7 +233,7 @@ local ServerStorage = game:GetService("ServerStorage")
 require(ServerStorage.UnitTest.RunUnitTest)()
 ```
 
-Before running tests yourself with execute_luau, confirm this Script is disabled in edit mode so the suite does not run twice.
+Before running tests yourself with {ToolNames.ExecuteLuau}, confirm this Script is disabled in edit mode so the suite does not run twice.
 
 ## EXAMPLE CASE
 
@@ -271,31 +278,29 @@ end
 ## RUNNING TESTS
 
 1. Confirm the case modules and `RunUnitTest` are saved, and `UnitTestRunner` is disabled.
-2. Start Play with start_stop_play.
-3. Run with execute_luau using `datamodel_type="Server"`:
+2. Start Play with {ToolNames.StartStopPlay}.
+3. Run with {ToolNames.ExecuteLuau} using `datamodel_type="Server"`:
 
 ```lua
 local ServerStorage = game:GetService("ServerStorage")
 return require(ServerStorage.UnitTest.RunUnitTest)(nil, 5)
 ```
 
-Pass a filter string as the first argument to run a subset (for example `("Inventory")`).
-4. Read the console with get_console_output. Per-test lines and the `[SUMMARY]` line appear there. The call also returns the totals table.
-5. Interpret results: the run passes only if there are zero `[FAIL]` and zero `[TIMEOUT]` lines. Use those lines and any stack traces to locate problems.
+Pass a filter string as the first argument to run a subset (for example `("Inventory")`). 4. Read the console with {ToolNames.GetConsoleOutput}. Per-test lines and the `[SUMMARY]` line appear there. The call also returns the totals table. 5. Interpret results: the run passes only if there are zero `[FAIL]` and zero `[TIMEOUT]` lines. Use those lines and any stack traces to locate problems.
 
 ## WORKFLOW
 
 1. Detect. Check for an existing framework (see CHOOSING THE APPROACH) and decide whether to conform to it or use the built-in harness.
 2. Plan. Identify the module under test and the behaviors that need coverage.
-3. Read the code. Use script_read and script_grep on both the module and any existing tests for it to see what is already covered.
+3. Read the code. Use {ToolNames.ReadFile} and {ToolNames.GrepSearch} on both the module and any existing tests for it to see what is already covered.
 4. Assess gaps. Decide which untested behaviors, boundaries, and error paths to add. If coverage is already adequate, say so rather than adding redundant cases.
 5. Write. In the detected framework's idiom and location, or per TEST CASE CONVENTIONS for the built-in harness (creating `RunUnitTest` and `UnitTestRunner` first if missing).
 6. Run. Through the framework's runner, or follow RUNNING TESTS for the built-in harness.
-7. Diagnose any failure before changing anything (see DEBUGGING FAILINGS).
+7. Diagnose any failure before changing anything (see DEBUGGING FAILURES).
 8. Fix the correct layer, then rerun, narrowing to the failing case while iterating (the filter argument for the built-in harness, or the framework's focus mechanism such as `it.only`).
 9. Report. Give a brief summary of what was covered and the final counts. Call out separately any tests that fail because the implementation appears to contradict its contract, listing them as suspected bugs (input, expected, actual) rather than folding them in with broken tests. If all pass, do not repeat the console output, since the main agent reads it anyway. If a failure could not be resolved, state what was attempted and what remains.
 
-## DEBUGGING FAILINGS
+## DEBUGGING FAILURES
 
 - Read the `[FAIL]` or `[TIMEOUT]` line and stack trace to find the failing case and assertion. Re-run with the filter argument to isolate it.
 - Decide whether the fault is in the test or in the module. A test is wrong only when its expected value does not match the function's intended contract. If the expectation reflects the contract but the module disagrees, the module is at fault, not the test. Confirm the intended contract from docstrings, types, callers, or the user before assuming.
